@@ -25,9 +25,9 @@
 - [x] **T4.2** Create `agents/stackrox-ui-guide.md`
 - [x] **T4.3** Create `references/patternfly-checklist.md`
 - [x] **T4.4** Create `references/stackrox-ui-patterns.md`
-- [ ] **CHECKPOINT 4** Human review: format matches existing agents/references
+- [x] **CHECKPOINT 4** Human review: format matches existing agents/references
 
 ## Phase 5: Docs
-- [ ] **T5.1** Update `docs/getting-started.md`
+- [x] **T5.1** Update `docs/getting-started.md`
 - [ ] **T5.2** Final `CLAUDE.md` update
 - [ ] **CHECKPOINT 5** Final validation against SPEC.md
