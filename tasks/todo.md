@@ -18,13 +18,13 @@
 - [x] **T3.3** Create `skills/graphql-and-data-layer/SKILL.md`
 - [x] **T3.4** Create `skills/react-state-patterns/SKILL.md`
 - [x] **T3.5** Create `skills/cypress-e2e-testing/SKILL.md`
-- [ ] **CHECKPOINT 3** Human review: skill-anatomy format, cross-refs, no duplication
+- [x] **CHECKPOINT 3** Human review: skill-anatomy format, cross-refs, no duplication
 
 ## Phase 4: Agents + References
-- [ ] **T4.1** Create `agents/frontend-reviewer.md`
-- [ ] **T4.2** Create `agents/stackrox-ui-guide.md`
-- [ ] **T4.3** Create `references/patternfly-checklist.md`
-- [ ] **T4.4** Create `references/stackrox-ui-patterns.md`
+- [x] **T4.1** Create `agents/frontend-reviewer.md`
+- [x] **T4.2** Create `agents/stackrox-ui-guide.md`
+- [x] **T4.3** Create `references/patternfly-checklist.md`
+- [x] **T4.4** Create `references/stackrox-ui-patterns.md`
 - [ ] **CHECKPOINT 4** Human review: format matches existing agents/references
 
 ## Phase 5: Docs
