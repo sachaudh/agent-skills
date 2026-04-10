@@ -4,7 +4,7 @@ This file tells any AI coding agent (Claude Code, Cursor, Copilot, Gemini CLI, O
 
 ## Repository Overview
 
-This is **StackRox Frontend Agent Skills**: a portable AI brain for frontend engineering on the StackRox UI. It contains 26 skills, 5 agent personas, 6 references, and 7 slash commands tuned for React 18.2, TypeScript 5.9, PatternFly 6, Apollo Client 3.8, Redux 4, and the StackRox UI codebase. It is documentation-only (Markdown + YAML frontmatter).
+This is **StackRox Frontend Agent Skills**: a portable AI brain for frontend engineering on the StackRox UI. It contains 27 skills, 5 agent personas, 6 references, and 7 slash commands tuned for React 18.2, TypeScript 5.9, PatternFly 6, Apollo Client 3.8, Redux 4, and the StackRox UI codebase. It is documentation-only (Markdown + YAML frontmatter).
 
 Read `CLAUDE.md` for project identity, conventions, and boundaries. Read `docs/getting-started.md` for how to consume skills.
 
@@ -47,7 +47,8 @@ Map user intent to the right skill:
 |--------|----------|
 | Any StackRox UI change | `stackrox-ui-conventions` (always) |
 | Building a PatternFly component | `patternfly-development` + `frontend-ui-engineering` |
-| Adding a GraphQL query or mutation | `graphql-and-data-layer` |
+| Fetching or mutating REST data for a new feature | `rest-and-service-layer` |
+| Modifying an existing GraphQL query or mutation | `graphql-and-data-layer` |
 | Wiring Redux or saga state | `react-state-patterns` |
 | Cypress E2E test | `cypress-e2e-testing` |
 | PatternFly major version upgrade | `deprecation-and-migration` + `patternfly-development` |
@@ -62,7 +63,7 @@ For agents without slash commands, follow this internal lifecycle:
 
 - DEFINE → `idea-refine` (if fuzzy) → `spec-driven-development`
 - PLAN → `planning-and-task-breakdown`
-- BUILD → `incremental-implementation` + `test-driven-development` + `stackrox-ui-conventions` (StackRox) + domain skill (e.g. `patternfly-development`, `graphql-and-data-layer`)
+- BUILD → `incremental-implementation` + `test-driven-development` + `stackrox-ui-conventions` (StackRox) + domain skill (e.g. `patternfly-development`, `rest-and-service-layer`, `graphql-and-data-layer`)
 - VERIFY → `debugging-and-error-recovery`, `browser-testing-with-devtools`, `cypress-e2e-testing`
 - REVIEW → `code-review-and-quality` + `security-and-hardening` + `performance-optimization`
 - SHIP → `shipping-and-launch` + `git-workflow-and-versioning`

@@ -22,7 +22,7 @@ Production-grade skills, agent personas, and references tailored for React 18.2,
 | Framework | React 18.2 |
 | Language | TypeScript 5.9 |
 | Component library | PatternFly 6 (react-core, react-table, react-charts, react-topology, react-icons) |
-| Data layer | Apollo Client 3.8 (GraphQL primary), Axios (REST fallback) |
+| Data layer | Axios (REST primary, via `services/` + `useRestQuery` / `useRestMutation` / `usePaginatedQuery`), Apollo Client 3.8 (GraphQL for existing queries and new backend-authored GraphQL endpoints) |
 | State management | Redux 4 + redux-thunk + redux-saga, React Router 5 |
 | Forms | Formik 2 + Yup, redux-form (legacy) |
 | Styling | Tailwind CSS, styled-components 5, CSS custom properties (light/dark themes) |
@@ -67,7 +67,7 @@ git clone https://github.com/sachaudh/agent-skills.git
 
 ---
 
-## All 26 Skills
+## All 27 Skills
 
 Skills are grouped by development phase. Load only the ones relevant to the current task -- loading everything wastes context.
 
@@ -107,7 +107,8 @@ Skills are grouped by development phase. Load only the ones relevant to the curr
 |-------|--------------|----------|
 | [stackrox-ui-conventions](skills/stackrox-ui-conventions/SKILL.md) | Directory structure (`Components/`, `Containers/`, `hooks/`, ...), naming, feature organization, composition rules | Any StackRox UI change -- load this alongside the domain skill |
 | [patternfly-development](skills/patternfly-development/SKILL.md) | PF6 component selection, theming, accessibility, wrap-vs-direct decisions | Building or modifying PatternFly components |
-| [graphql-and-data-layer](skills/graphql-and-data-layer/SKILL.md) | Apollo Client 3.8 query/mutation patterns, cache policies, optimistic updates | Adding or modifying GraphQL operations |
+| [rest-and-service-layer](skills/rest-and-service-layer/SKILL.md) | REST-first data fetching via `services/` + `useRestQuery` / `useRestMutation` / `usePaginatedQuery`, cancellation, search, error formatting | Fetching or mutating server data for a new feature |
+| [graphql-and-data-layer](skills/graphql-and-data-layer/SKILL.md) | Apollo Client 3.8 query/mutation patterns, cache policies, optimistic updates | Modifying existing GraphQL or building UI for a new GraphQL endpoint |
 | [react-state-patterns](skills/react-state-patterns/SKILL.md) | Decision tree for Apollo cache, useState, Context, Redux + saga | Choosing or migrating state management for a feature |
 
 ### Verify
@@ -203,7 +204,7 @@ Every skill follows a consistent anatomy:
 
 ```
 agent-skills/
-├── skills/                             # 26 core skills (SKILL.md per directory)
+├── skills/                             # 27 core skills (SKILL.md per directory)
 │   ├── using-agent-skills/             #   Meta: discovery flowchart
 │   ├── idea-refine/                    #   Define
 │   ├── spec-driven-development/        #   Define
@@ -216,6 +217,7 @@ agent-skills/
 │   ├── api-and-interface-design/       #   Build
 │   ├── stackrox-ui-conventions/        #   Build -- StackRox (new)
 │   ├── patternfly-development/         #   Build -- StackRox (new)
+│   ├── rest-and-service-layer/         #   Build -- StackRox (new)
 │   ├── graphql-and-data-layer/         #   Build -- StackRox (new)
 │   ├── react-state-patterns/           #   Build -- StackRox (new)
 │   ├── browser-testing-with-devtools/  #   Verify

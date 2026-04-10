@@ -73,7 +73,8 @@ Do not load all skills at once -- it wastes context. Load skills that match the 
 | Task | Load these skills |
 |------|-------------------|
 | Building a new PatternFly component | `patternfly-development` + `stackrox-ui-conventions` + `frontend-ui-engineering` |
-| Adding a GraphQL query or mutation | `graphql-and-data-layer` + `stackrox-ui-conventions` |
+| Fetching or mutating REST data for a new feature | `rest-and-service-layer` + `stackrox-ui-conventions` |
+| Modifying an existing GraphQL query or mutation | `graphql-and-data-layer` + `stackrox-ui-conventions` |
 | Wiring Redux/saga state | `react-state-patterns` + `stackrox-ui-conventions` |
 | Writing a Cypress E2E test | `cypress-e2e-testing` + `test-driven-development` |
 | Writing a Vitest unit/component test | `test-driven-development` |
@@ -108,7 +109,8 @@ See [skill-anatomy.md](skill-anatomy.md) for the full specification.
 |-------|---------|
 | `skills/stackrox-ui-conventions/` | Directory structure, naming, feature organization, component composition rules |
 | `skills/patternfly-development/` | PatternFly 6 component selection, theming, accessibility, wrap-vs-direct decisions |
-| `skills/graphql-and-data-layer/` | Apollo Client 3.8 query/mutation patterns, cache policies, optimistic updates |
+| `skills/rest-and-service-layer/` | REST-first data fetching via `services/` + `useRestQuery` / `useRestMutation` / `usePaginatedQuery`, cancellation, search, error formatting |
+| `skills/graphql-and-data-layer/` | Apollo Client 3.8 query/mutation patterns for existing GraphQL code and new backend-authored GraphQL endpoints |
 | `skills/react-state-patterns/` | Apollo cache, Redux + saga, Context, and local state decision tree |
 | `skills/cypress-e2e-testing/` | Page objects, `cy.intercept()` for GraphQL, `cy.session()` auth, PF testing |
 

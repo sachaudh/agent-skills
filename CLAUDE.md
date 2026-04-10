@@ -11,7 +11,7 @@ This repo is documentation-only (Markdown + YAML frontmatter). It is consumed by
 | Framework | React 18.2 |
 | Language | TypeScript 5.9 |
 | Component library | PatternFly 6 (react-core, react-table, react-charts, react-topology, react-icons) |
-| Data layer | Apollo Client 3.8 (GraphQL primary), Axios (REST fallback) |
+| Data layer | Axios (REST primary, via `services/` + `useRestQuery` / `useRestMutation` / `usePaginatedQuery`), Apollo Client 3.8 (GraphQL for existing queries and new backend-authored GraphQL endpoints) |
 | State management | Redux 4 + redux-thunk + redux-saga, React Router 5 (MobX 6 present only as a transitive peer dep of `@patternfly/react-topology`) |
 | Forms | Formik 2 + Yup, redux-form (legacy) |
 | Styling | Tailwind CSS, styled-components 5, PostCSS, CSS custom properties (light/dark themes) |
@@ -25,7 +25,7 @@ This repo is documentation-only (Markdown + YAML frontmatter). It is consumed by
 ## Project Structure
 
 ```
-skills/            → 26 core skills (SKILL.md per directory)
+skills/            → 27 core skills (SKILL.md per directory)
 agents/            → 5 agent personas (code-reviewer, frontend-reviewer,
                      security-auditor, stackrox-ui-guide, test-engineer)
 references/        → 6 supplementary checklists (accessibility, patternfly,
@@ -48,7 +48,7 @@ SPEC.md            → Living spec created by /spec
 
 **Build:**
 - Core: incremental-implementation, test-driven-development, context-engineering, source-driven-development, api-and-interface-design, frontend-ui-engineering
-- StackRox: stackrox-ui-conventions, patternfly-development, graphql-and-data-layer, react-state-patterns
+- StackRox: stackrox-ui-conventions, patternfly-development, rest-and-service-layer, graphql-and-data-layer, react-state-patterns
 
 **Verify:** browser-testing-with-devtools, debugging-and-error-recovery, cypress-e2e-testing
 

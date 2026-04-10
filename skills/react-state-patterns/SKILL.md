@@ -17,6 +17,7 @@ MobX appears in `package.json` and is imported in three files, but **MobX is not
 - Choosing between Apollo cache, useState, context, or Redux
 - Working with Redux reducers, actions, or sagas
 - Refactoring state management in an existing feature
+- NOT for REST data fetching (see `rest-and-service-layer`)
 - NOT for Apollo query/mutation patterns (see `graphql-and-data-layer`)
 - NOT for project structure decisions (see `stackrox-ui-conventions`)
 
@@ -26,7 +27,8 @@ Start here when adding state to a feature:
 
 ```
 Is it server data fetched from an API?
-  YES --> Apollo Client cache (via useQuery/useMutation)
+  YES --> Use `rest-and-service-layer` for REST (default) or
+          `graphql-and-data-layer` for existing GraphQL code
   NO  --> Is it local to a single component?
     YES --> useState or useReducer
     NO  --> Is it shared by 2-3 nearby components?
