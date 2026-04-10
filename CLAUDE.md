@@ -1,16 +1,16 @@
-# agent-skills
+# StackRox Frontend Agent Skills
 
-This is the agent-skills project — a collection of production-grade engineering skills for AI coding agents.
+A portable AI brain for StackRox frontend engineering -- production-grade skills, agents, and references tailored for React 18.2, TypeScript 5.9, PatternFly 6, Apollo Client 3.8, Redux 4, and the StackRox UI codebase.
 
 ## Project Structure
 
 ```
-skills/       → Core skills (SKILL.md per directory)
-agents/       → Reusable agent personas (code-reviewer, test-engineer, security-auditor)
-hooks/        → Session lifecycle hooks
-.claude/commands/ → Slash commands (/spec, /plan, /build, /test, /review, /code-simplify, /ship)
-references/   → Supplementary checklists (testing, performance, security, accessibility)
-docs/         → Setup guides for different tools
+skills/            → Core skills (SKILL.md per directory)
+agents/            → Reusable agent personas (code-reviewer, test-engineer, security-auditor)
+hooks/             → Hook documentation (SIMPLIFY-IGNORE.md)
+.claude/commands/  → Slash commands (/spec, /plan, /build, /test, /review, /code-simplify, /ship)
+references/        → Supplementary checklists (testing, performance, security, accessibility)
+docs/              → getting-started.md, skill-anatomy.md
 ```
 
 ## Skills by Phase
