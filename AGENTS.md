@@ -1,169 +1,123 @@
 # AGENTS.md
 
-This file provides guidance to AI coding agents (Claude Code, Cursor, Copilot, Antigravity, etc.) when working with code in this repository.
+This file tells any AI coding agent (Claude Code, Cursor, Copilot, Gemini CLI, OpenCode, etc.) how to use this repository.
 
 ## Repository Overview
 
-A collection of skills for Claude.ai and Claude Code for senior software engineers. Skills are packaged instructions and scripts that extend Claude and your coding agents capabilities.
+This is **StackRox Frontend Agent Skills**: a portable AI brain for frontend engineering on the StackRox UI. It contains 26 skills, 5 agent personas, 6 references, and 7 slash commands tuned for React 18.2, TypeScript 5.9, PatternFly 6, Apollo Client 3.8, Redux 4, and the StackRox UI codebase. It is documentation-only (Markdown + YAML frontmatter).
 
-## OpenCode Integration
+Read `CLAUDE.md` for project identity, conventions, and boundaries. Read `docs/getting-started.md` for how to consume skills.
 
-OpenCode uses a **skill-driven execution model** powered by the `skill` tool and this repository's `/skills` directory.
+## Core Rules
 
-### Core Rules
+- If a task matches a skill, invoke it. Skills encode processes with verification gates -- do not partially apply them.
+- Skills live in `skills/<skill-name>/SKILL.md`.
+- Follow the skill instructions exactly. Do not skip the Verification section.
+- Always load `stackrox-ui-conventions` alongside any other skill when working on StackRox UI code.
+- Never duplicate content between skills -- cross-reference instead.
+- Never add backend-only content outside clearly labeled "Backend Reference" sections.
 
-- If a task matches a skill, you MUST invoke it
-- Skills are located in `skills/<skill-name>/SKILL.md`
-- Never implement directly if a skill applies
-- Always follow the skill instructions exactly (do not partially apply them)
+## Intent → Skill Mapping
 
-### Intent → Skill Mapping
+Map user intent to the right skill:
 
-The agent should automatically map user intent to skills:
+### Generic engineering lifecycle
 
-- Feature / new functionality → `spec-driven-development`, then `incremental-implementation`, `test-driven-development`
-- Planning / breakdown → `planning-and-task-breakdown`
-- Bug / failure / unexpected behavior → `debugging-and-error-recovery`
-- Code review → `code-review-and-quality`
-- Refactoring / simplification → `code-simplification`
-- API or interface design → `api-and-interface-design`
-- UI work → `frontend-ui-engineering`
+| Intent | Skill(s) |
+|--------|----------|
+| Vague idea, needs exploration | `idea-refine` |
+| New feature or significant change | `spec-driven-development` → `planning-and-task-breakdown` |
+| Implementing code | `incremental-implementation` + `test-driven-development` |
+| Writing or running tests | `test-driven-development` |
+| Something broke | `debugging-and-error-recovery` |
+| Code review | `code-review-and-quality` |
+| Refactoring | `code-simplification` |
+| API or interface design | `api-and-interface-design` |
+| Committing and branching | `git-workflow-and-versioning` |
+| CI/CD pipeline work | `ci-cd-and-automation` |
+| Documentation or ADRs | `documentation-and-adrs` |
+| Deploy or launch | `shipping-and-launch` |
+| Removing old systems | `deprecation-and-migration` |
+| Providing context to an agent | `context-engineering` |
+| Grounding in official docs | `source-driven-development` |
 
-### Lifecycle Mapping (Implicit Commands)
+### StackRox-specific tasks
 
-OpenCode does not support slash commands like `/spec` or `/plan`.
+| Intent | Skill(s) |
+|--------|----------|
+| Any StackRox UI change | `stackrox-ui-conventions` (always) |
+| Building a PatternFly component | `patternfly-development` + `frontend-ui-engineering` |
+| Adding a GraphQL query or mutation | `graphql-and-data-layer` |
+| Wiring Redux or saga state | `react-state-patterns` |
+| Cypress E2E test | `cypress-e2e-testing` |
+| PatternFly major version upgrade | `deprecation-and-migration` + `patternfly-development` |
+| Hardening a form or auth flow | `security-and-hardening` + `references/security-checklist.md` |
+| Debugging in the browser | `debugging-and-error-recovery` + `browser-testing-with-devtools` |
+| Reviewing a StackRox PR | `code-review-and-quality` + `agents/frontend-reviewer.md` |
+| Onboarding to the codebase | `agents/stackrox-ui-guide.md` + `stackrox-ui-conventions` |
 
-Instead, the agent must internally follow this lifecycle:
+## Lifecycle Mapping
 
-- DEFINE → `spec-driven-development`
+For agents without slash commands, follow this internal lifecycle:
+
+- DEFINE → `idea-refine` (if fuzzy) → `spec-driven-development`
 - PLAN → `planning-and-task-breakdown`
-- BUILD → `incremental-implementation` + `test-driven-development`
-- VERIFY → `debugging-and-error-recovery`
-- REVIEW → `code-review-and-quality`
-- SHIP → `shipping-and-launch`
+- BUILD → `incremental-implementation` + `test-driven-development` + `stackrox-ui-conventions` (StackRox) + domain skill (e.g. `patternfly-development`, `graphql-and-data-layer`)
+- VERIFY → `debugging-and-error-recovery`, `browser-testing-with-devtools`, `cypress-e2e-testing`
+- REVIEW → `code-review-and-quality` + `security-and-hardening` + `performance-optimization`
+- SHIP → `shipping-and-launch` + `git-workflow-and-versioning`
 
-### Execution Model
+## Execution Model
 
 For every request:
 
-1. Determine if any skill applies (even 1% chance)
-2. Invoke the appropriate skill using the `skill` tool
-3. Follow the skill workflow strictly
-4. Only proceed to implementation after required steps (spec, plan, etc.) are complete
+1. Determine which skill(s) apply (StackRox UI work always includes `stackrox-ui-conventions`).
+2. Load the relevant `SKILL.md` files into context.
+3. Follow each skill's workflow strictly, including Verification.
+4. Only mark work complete after Verification passes.
 
-### Anti-Rationalization
+## Anti-Rationalization
 
-The following thoughts are incorrect and must be ignored:
+These thoughts are wrong and must be ignored:
 
 - "This is too small for a skill"
 - "I can just quickly implement this"
-- "I’ll gather context first"
+- "I will gather context later"
+- "The verification step is optional if the change is simple"
+- "I know this pattern -- I do not need to check the real StackRox codebase"
 
-Correct behavior:
+Correct behavior: check for skills first, apply them fully, verify against the real codebase when asserting StackRox facts.
 
-- Always check for and use skills first
+## Slash Commands (Claude Code)
 
-This ensures OpenCode behaves similarly to Claude Code with full workflow enforcement.
+If your agent supports slash commands, these are wired up in `.claude/commands/`:
 
-## Creating a New Skill
+| Command | Skill(s) invoked |
+|---------|------------------|
+| `/spec` | spec-driven-development |
+| `/plan` | planning-and-task-breakdown |
+| `/build` | incremental-implementation + test-driven-development |
+| `/test` | test-driven-development |
+| `/review` | code-review-and-quality |
+| `/code-simplify` | code-simplification |
+| `/ship` | shipping-and-launch |
 
-### Directory Structure
+## Adding New Skills
 
-```
-skills/
-  {skill-name}/           # kebab-case directory name
-    SKILL.md              # Required: skill definition
-    scripts/              # Required: executable scripts
-      {script-name}.sh    # Bash scripts (preferred)
-  {skill-name}.zip        # Required: packaged for distribution
-```
+See `CONTRIBUTING.md` for the full process. Short version:
 
-### Naming Conventions
+- Create `skills/<kebab-case>/SKILL.md`.
+- Add YAML frontmatter: `name` (matching the directory) and `description` (what it does, then "Use when...", max 1024 chars).
+- Include all six required sections: Overview, When to Use, Core Process, Common Rationalizations, Red Flags, Verification.
+- Ground StackRox-specific claims in verified facts from `ui/apps/platform/src/`.
+- Cross-reference related skills rather than duplicating content.
 
-- **Skill directory**: `kebab-case` (e.g. `web-quality`)
-- **SKILL.md**: Always uppercase, always this exact filename
-- **Scripts**: `kebab-case.sh` (e.g., `deploy.sh`, `fetch-logs.sh`)
-- **Zip file**: Must match directory name exactly: `{skill-name}.zip`
+## StackRox Directory Ground Truth
 
-### SKILL.md Format
+When asserting anything about StackRox UI structure, remember:
 
-```markdown
----
-name: {skill-name}
-description: {One sentence describing when to use this skill. Include trigger phrases like "Deploy my app", "Check logs", etc.}
----
-
-# {Skill Title}
-
-{Brief description of what the skill does.}
-
-## How It Works
-
-{Numbered list explaining the skill's workflow}
-
-## Usage
-
-```bash
-bash /mnt/skills/user/{skill-name}/scripts/{script}.sh [args]
-```
-
-**Arguments:**
-- `arg1` - Description (defaults to X)
-
-**Examples:**
-{Show 2-3 common usage patterns}
-
-## Output
-
-{Show example output users will see}
-
-## Present Results to User
-
-{Template for how Claude should format results when presenting to users}
-
-## Troubleshooting
-
-{Common issues and solutions, especially network/permissions errors}
-```
-
-### Best Practices for Context Efficiency
-
-Skills are loaded on-demand — only the skill name and description are loaded at startup. The full `SKILL.md` loads into context only when the agent decides the skill is relevant. To minimize context usage:
-
-- **Keep SKILL.md under 500 lines** — put detailed reference material in separate files
-- **Write specific descriptions** — helps the agent know exactly when to activate the skill
-- **Use progressive disclosure** — reference supporting files that get read only when needed
-- **Prefer scripts over inline code** — script execution doesn't consume context (only output does)
-- **File references work one level deep** — link directly from SKILL.md to supporting files
-
-### Script Requirements
-
-- Use `#!/bin/bash` shebang
-- Use `set -e` for fail-fast behavior
-- Write status messages to stderr: `echo "Message" >&2`
-- Write machine-readable output (JSON) to stdout
-- Include a cleanup trap for temp files
-- Reference the script path as `/mnt/skills/user/{skill-name}/scripts/{script}.sh`
-
-### Creating the Zip Package
-
-After creating or updating a skill:
-
-```bash
-cd skills
-zip -r {skill-name}.zip {skill-name}/
-```
-
-### End-User Installation
-
-Document these two installation methods for users:
-
-**Claude Code:**
-```bash
-cp -r skills/{skill-name} ~/.claude/skills/
-```
-
-**claude.ai:**
-Add the skill to project knowledge or paste SKILL.md contents into the conversation.
-
-If the skill requires network access, instruct users to add required domains at `claude.ai/settings/capabilities`.
+- Lives at `ui/apps/platform/src/`
+- **PascalCase**: `Components/`, `Containers/`
+- **lowercase**: `hooks/`, `services/`, `queries/`, `reducers/`, `sagas/`, `providers/`, `utils/`, `types/`, `constants/`, `sorters/`
+- Route constants: `routePaths.ts` at the top level
+- Verify any other claim against the real repo before committing.
