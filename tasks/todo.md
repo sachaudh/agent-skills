@@ -10,14 +10,14 @@
 - [x] **T2.2** Customize `skills/security-and-hardening/SKILL.md` (frontend security focus)
 - [x] **T2.3** Customize `skills/deprecation-and-migration/SKILL.md` (frontend migrations)
 - [x] **T2.4** Customize `references/security-checklist.md` (frontend checklist)
-- [ ] **CHECKPOINT 2** Human review: standard sections preserved, StackRox content added
+- [x] **CHECKPOINT 2** Human review: standard sections preserved, StackRox content added
 
 ## Phase 3: New Skills
-- [ ] **T3.1** Create `skills/stackrox-ui-conventions/SKILL.md` (DO FIRST)
-- [ ] **T3.2** Create `skills/patternfly-development/SKILL.md`
-- [ ] **T3.3** Create `skills/graphql-and-data-layer/SKILL.md`
-- [ ] **T3.4** Create `skills/react-state-patterns/SKILL.md`
-- [ ] **T3.5** Create `skills/cypress-e2e-testing/SKILL.md`
+- [x] **T3.1** Create `skills/stackrox-ui-conventions/SKILL.md` (DO FIRST)
+- [x] **T3.2** Create `skills/patternfly-development/SKILL.md`
+- [x] **T3.3** Create `skills/graphql-and-data-layer/SKILL.md`
+- [x] **T3.4** Create `skills/react-state-patterns/SKILL.md`
+- [x] **T3.5** Create `skills/cypress-e2e-testing/SKILL.md`
 - [ ] **CHECKPOINT 3** Human review: skill-anatomy format, cross-refs, no duplication
 
 ## Phase 4: Agents + References
