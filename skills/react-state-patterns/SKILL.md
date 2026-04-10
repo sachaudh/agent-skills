@@ -1,20 +1,21 @@
 ---
 name: react-state-patterns
-description: Guides state management decisions in StackRox UI's hybrid Redux/MobX/Apollo codebase. Use when choosing between local state, context, Redux, MobX, or Apollo cache, when adding new state to a feature, or when refactoring existing state management patterns.
+description: Guides state management decisions in StackRox UI's Apollo + Redux + React codebase. Use when choosing between local state, context, Redux, or Apollo cache, when adding new state to a feature, or when refactoring existing state management patterns.
 ---
 
 # React State Patterns
 
 ## Overview
 
-StackRox UI uses multiple state management approaches: Apollo Client cache for server data, React local state and context for UI state, Redux 4 with thunk/saga for complex workflows, and MobX 6 for certain feature areas. This skill provides a decision framework for choosing the right approach and patterns for working within each system without introducing inconsistency.
+StackRox UI uses multiple state management approaches: Apollo Client cache for server data, React local state and context for UI state, and Redux 4 with thunk/saga for complex cross-cutting workflows. This skill provides a decision framework for choosing the right approach and patterns for working within each system without introducing inconsistency.
+
+MobX appears in `package.json` and is imported in three files, but **MobX is not used as an application state management choice**. It is a transitive peer dependency of `@patternfly/react-topology`: `index.tsx` calls `mobxConfigure({ isolateGlobalState: true })` to prevent global-state conflicts, and two NetworkGraph files wrap topology components with `observer` because the PatternFly topology API requires it. Do not treat MobX as a state option when adding new state.
 
 ## When to Use
 
 - Adding state to a new or existing feature
-- Choosing between Apollo cache, useState, context, Redux, or MobX
+- Choosing between Apollo cache, useState, context, or Redux
 - Working with Redux reducers, actions, or sagas
-- Working with MobX stores or observables
 - Refactoring state management in an existing feature
 - NOT for Apollo query/mutation patterns (see `graphql-and-data-layer`)
 - NOT for project structure decisions (see `stackrox-ui-conventions`)
@@ -34,9 +35,7 @@ Is it server data fetched from an API?
         YES --> React Context (via a provider in providers/)
         NO  --> Is it part of a complex async workflow (multi-step, orchestrated)?
           YES --> Redux + redux-saga (reducers/ + sagas/)
-          NO  --> Is the existing feature area already using MobX?
-            YES --> MobX store (keep consistent with surrounding code)
-            NO  --> Redux + redux-thunk (reducers/)
+          NO  --> Redux + redux-thunk (reducers/)
 ```
 
 ### Quick Reference Table
@@ -51,7 +50,6 @@ Is it server data fetched from an API?
 | URL-shareable state | URL search params | In component | Filters, pagination, sort order |
 | Complex async workflows | Redux + saga | reducers/ + sagas/ | Policy creation wizard, bulk operations |
 | Simple async actions | Redux + thunk | reducers/ | Fetch-and-store patterns |
-| Feature-specific (existing MobX area) | MobX store | Feature directory | Network graph, topology views |
 
 ## React Local State Patterns
 
@@ -230,65 +228,15 @@ export function fetchVulnerabilities(filters: VulnerabilityFilters) {
 }
 ```
 
-## MobX Patterns
+## NetworkGraph and react-topology
 
-MobX is used in specific feature areas (network graph, topology views). Follow these patterns when working in those areas:
+`@patternfly/react-topology` (used for the network graph and other topology views) pulls in MobX as a peer dependency and exposes an API that expects its consumers to wrap certain components with `mobx-react`'s `observer`. This is the only reason MobX appears in the StackRox codebase.
 
-```tsx
-// stores/NetworkGraphStore.ts
-import { makeAutoObservable, runInAction } from 'mobx';
+When working inside `Containers/NetworkGraph/`:
 
-export class NetworkGraphStore {
-  nodes: NetworkNode[] = [];
-  edges: NetworkEdge[] = [];
-  selectedNodeId: string | null = null;
-  isLoading = false;
-
-  constructor() {
-    makeAutoObservable(this);
-  }
-
-  async fetchGraph(clusterId: string) {
-    this.isLoading = true;
-    try {
-      const data = await networkService.fetchGraph(clusterId);
-      runInAction(() => {
-        this.nodes = data.nodes;
-        this.edges = data.edges;
-        this.isLoading = false;
-      });
-    } catch {
-      runInAction(() => {
-        this.isLoading = false;
-      });
-    }
-  }
-
-  selectNode(nodeId: string) {
-    this.selectedNodeId = nodeId;
-  }
-}
-```
-
-### Using MobX in Components
-
-```tsx
-import { observer } from 'mobx-react-lite';
-
-export const NetworkGraph = observer(function NetworkGraph({
-  store,
-}: {
-  store: NetworkGraphStore;
-}) {
-  if (store.isLoading) return <Spinner />;
-
-  return (
-    <VisualizationProvider>
-      <Visualization nodes={store.nodes} edges={store.edges} />
-    </VisualizationProvider>
-  );
-});
-```
+- Use `observer` from `mobx-react` on topology subcomponents only when required by the react-topology API (e.g., custom edge, group, or node components). Follow the existing patterns in `StyleEdge.tsx` and `DefaultFakeGroup.tsx`.
+- Do not create MobX stores for application state. Feature-level state (filters, selection, panels, fetched data) still belongs in Apollo cache, local state, or Redux per the decision tree above.
+- Do not import from `mobx` directly in application code. The `mobxConfigure({ isolateGlobalState: true })` call in `src/index.tsx` exists solely to isolate react-topology's internal MobX instance; do not add to it.
 
 ## Anti-Mixing Rules
 
@@ -296,7 +244,7 @@ These rules prevent state management approaches from conflicting:
 
 1. **Do not mix Redux and Apollo for the same data.** If data comes from a GraphQL endpoint, use Apollo cache. Do not fetch with Apollo and then store in Redux.
 
-2. **Do not introduce MobX into Redux-managed features.** If a feature uses Redux, keep using Redux. MobX is only for feature areas that already use it.
+2. **Do not introduce MobX as an application state tool.** MobX exists only to satisfy `@patternfly/react-topology`. Never create MobX stores, observables, or actions for feature state, even inside NetworkGraph containers.
 
 3. **Do not use React Context for frequently changing data.** Context re-renders all consumers on every change. Use it for stable values (auth, theme, feature flags), not for lists or counters.
 
@@ -322,7 +270,7 @@ These rules prevent state management approaches from conflicting:
 | Rationalization | Reality |
 |---|---|
 | "I'll use Redux for everything -- it's consistent" | Redux adds boilerplate. Local state and Apollo cache handle 80% of cases with less code. |
-| "MobX is simpler, I'll use it for this new feature" | MobX is only for existing MobX feature areas. Introducing it elsewhere fragments the codebase. |
+| "MobX is in package.json so it's fair game" | MobX is a transitive peer dep of `@patternfly/react-topology`. StackRox owns zero MobX state. Use Apollo, local state, or Redux instead. |
 | "I'll store the API response in Redux for caching" | Apollo Client already caches GraphQL responses. Duplicating data in Redux creates sync bugs. |
 | "Context is fine for this list of items" | Context re-renders all consumers on every change. For dynamic data, use lifted state, Redux, or Apollo. |
 | "useEffect to sync state is the React way" | useEffect for state sync is a code smell. Compute derived state with useMemo or restructure the component tree. |
@@ -330,7 +278,9 @@ These rules prevent state management approaches from conflicting:
 ## Red Flags
 
 - Apollo query results being copied into Redux state
-- MobX stores introduced in features that otherwise use Redux
+- `makeAutoObservable`, `makeObservable`, or new MobX stores anywhere in the codebase
+- `observer` wrappers outside of react-topology subcomponents in `Containers/NetworkGraph/`
+- Direct imports from `mobx` in application code
 - React Context holding rapidly changing data (lists, counters, form state)
 - useEffect used to synchronize two pieces of state
 - Redux slices for state used by a single component
@@ -343,7 +293,8 @@ After implementing state management:
 
 - [ ] State tool matches the decision tree (Apollo for server data, local state for UI, etc.)
 - [ ] No mixing of Apollo and Redux for the same data source
-- [ ] MobX only used in existing MobX feature areas
+- [ ] No new MobX stores, observables, or imports from `mobx` in application code
+- [ ] `observer` only used where react-topology requires it inside `Containers/NetworkGraph/`
 - [ ] Context only used for stable, read-heavy values
 - [ ] Derived state computed (useMemo), not stored (useState + useEffect)
 - [ ] Redux actions handle loading, success, and error states

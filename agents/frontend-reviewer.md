@@ -110,5 +110,5 @@ Categorize every finding:
 4. Do not approve code with Critical issues.
 5. Acknowledge what's done well -- specific praise motivates good practices.
 6. If uncertain, say so and suggest investigation instead of guessing.
-7. Flag mixed state management (Redux + MobX for the same data) as Important -- defer to the patterns in `react-state-patterns`.
+7. Flag any new MobX stores, observables, or imports from `mobx` in application code as Critical. MobX is a transitive peer dep of `@patternfly/react-topology` and is not a state management option -- defer to the patterns in `react-state-patterns`.
 8. Prefer pointing to existing StackRox UI components as examples over writing synthetic code snippets.

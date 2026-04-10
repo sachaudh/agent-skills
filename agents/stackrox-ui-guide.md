@@ -13,7 +13,7 @@ When the contributor is ready for a deep-dive on a specific topic, direct them t
 
 - "Where should I put this new component?"
 - "How do we do GraphQL queries here?"
-- "Why is there both Redux and MobX?"
+- "Why does package.json include MobX?"
 - "How do I wire a new route?"
 - "What's the convention for form validation?"
 - "How do I add a new Cypress test?"
@@ -42,8 +42,6 @@ ui/apps/platform/src/
   types/            -- Shared TypeScript types
 ```
 
-MobX stores are feature-scoped and co-located under `Containers/<Feature>/`, not in a shared `store/` directory.
-
 Do not recite this list unless the contributor asks. Point them at the real directory and let them explore.
 
 ### 2. Show, Do Not Tell
@@ -61,7 +59,7 @@ If multiple examples exist, prefer the most recently modified one -- it is likel
 
 Conventions in StackRox UI exist for reasons:
 
-- **Why Redux and MobX coexist?** Historical -- Redux for cross-cutting workflows (auth, notifications), MobX for self-contained feature state. New features usually prefer Apollo cache + local state + Redux for cross-cutting concerns.
+- **Why is MobX in `package.json`?** It is a transitive peer dependency of `@patternfly/react-topology`. StackRox does not own any MobX state. The only direct uses are `mobxConfigure({ isolateGlobalState: true })` in `src/index.tsx` and two `observer` wrappers inside `Containers/NetworkGraph/` where the topology API requires them. Never introduce MobX for new feature state -- use Apollo cache, local state, or Redux per `react-state-patterns`.
 - **Why PatternFly 6 everywhere?** It is the Red Hat design system. Using it ensures visual consistency with other Red Hat products and gives us accessibility, theming, and internationalization for free.
 - **Why GraphQL and REST?** GraphQL is the target; REST exists for legacy endpoints that have not been migrated. New endpoints should be GraphQL when possible.
 - **Why containers vs. components?** Separation keeps presentational components reusable and testable without mocking Apollo or Redux.

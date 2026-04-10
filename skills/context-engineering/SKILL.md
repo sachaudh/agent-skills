@@ -45,7 +45,7 @@ Create a rules file that persists across sessions. This is the highest-leverage 
 
 ## Tech Stack
 - React 18.2, TypeScript 5.9, PatternFly 6, Vite 6
-- Apollo Client 3.8, Redux 4 + thunk + saga, MobX 6
+- Apollo Client 3.8, Redux 4 + thunk + saga
 - React Router 5, Formik 2 + Yup
 - Vitest 4, Cypress 15
 

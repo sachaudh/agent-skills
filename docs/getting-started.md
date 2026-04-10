@@ -109,7 +109,7 @@ See [skill-anatomy.md](skill-anatomy.md) for the full specification.
 | `skills/stackrox-ui-conventions/` | Directory structure, naming, feature organization, component composition rules |
 | `skills/patternfly-development/` | PatternFly 6 component selection, theming, accessibility, wrap-vs-direct decisions |
 | `skills/graphql-and-data-layer/` | Apollo Client 3.8 query/mutation patterns, cache policies, optimistic updates |
-| `skills/react-state-patterns/` | Redux + saga, MobX, Context, and local state decision tree |
+| `skills/react-state-patterns/` | Apollo cache, Redux + saga, Context, and local state decision tree |
 | `skills/cypress-e2e-testing/` | Page objects, `cy.intercept()` for GraphQL, `cy.session()` auth, PF testing |
 
 ### Customized Skills

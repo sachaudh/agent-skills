@@ -12,7 +12,7 @@ This repo is documentation-only (Markdown + YAML frontmatter). It is consumed by
 | Language | TypeScript 5.9 |
 | Component library | PatternFly 6 (react-core, react-table, react-charts, react-topology, react-icons) |
 | Data layer | Apollo Client 3.8 (GraphQL primary), Axios (REST fallback) |
-| State management | Redux 4 + redux-thunk + redux-saga, MobX 6 (secondary), React Router 5 |
+| State management | Redux 4 + redux-thunk + redux-saga, React Router 5 (MobX 6 present only as a transitive peer dep of `@patternfly/react-topology`) |
 | Forms | Formik 2 + Yup, redux-form (legacy) |
 | Styling | Tailwind CSS, styled-components 5, PostCSS, CSS custom properties (light/dark themes) |
 | Build | Vite 6, Webpack 5 (OpenShift Console plugin only) |
