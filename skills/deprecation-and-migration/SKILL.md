@@ -1,6 +1,6 @@
 ---
 name: deprecation-and-migration
-description: Manages deprecation and migration. Use when removing old systems, APIs, or features. Use when migrating users from one implementation to another. Use when deciding whether to maintain or sunset existing code.
+description: Manages deprecation and migration for frontend systems. Use when removing old components, upgrading PatternFly versions, migrating between state management approaches, or modernizing React patterns. Use when deciding whether to maintain legacy frontend code or invest in migration.
 ---
 
 # Deprecation and Migration
@@ -172,6 +172,154 @@ Zombie code is code that nobody owns but everybody depends on. It's not actively
 - Documentation that references systems that no longer exist
 
 **Response:** Either assign an owner and maintain it properly, or deprecate it with a concrete migration plan. Zombie code cannot stay in limbo — it either gets investment or removal.
+
+## Frontend Migration Patterns
+
+The StackRox UI has specific migration patterns that recur as the frontend stack evolves. For PatternFly component details, see the `patternfly-development` skill. For state management decisions, see the `react-state-patterns` skill.
+
+### 1. PatternFly Major Version Upgrades
+
+PatternFly upgrades often require component API changes. Use wrapper components to isolate the migration surface.
+
+**Example: Select component migration (PF5 to PF6)**
+
+```typescript
+// BEFORE (PatternFly 5): Single Select with onChange string value
+import { Select, SelectOption } from '@patternfly/react-core/deprecated';
+
+<Select
+  onSelect={(_event, value) => setSelected(value as string)}
+  selections={selected}
+  isOpen={isOpen}
+  onToggle={setIsOpen}
+>
+  <SelectOption value="critical">Critical</SelectOption>
+  <SelectOption value="high">High</SelectOption>
+</Select>
+
+// AFTER (PatternFly 6): Composable Select with MenuToggle
+import { Select, SelectOption, SelectList, MenuToggle } from '@patternfly/react-core';
+
+<Select
+  isOpen={isOpen}
+  onSelect={(_event, value) => setSelected(value as string)}
+  onOpenChange={setIsOpen}
+  toggle={(toggleRef) => (
+    <MenuToggle ref={toggleRef} onClick={() => setIsOpen(!isOpen)} isExpanded={isOpen}>
+      {selected || 'Select severity'}
+    </MenuToggle>
+  )}
+>
+  <SelectList>
+    <SelectOption value="critical">Critical</SelectOption>
+    <SelectOption value="high">High</SelectOption>
+  </SelectList>
+</Select>
+```
+
+**Migration strategy:**
+1. Create a wrapper component (`SimpleSelect`) that encapsulates the new PF6 API
+2. Replace old `Select` imports with the wrapper, one file at a time
+3. Run Cypress tests after each batch of replacements
+4. Remove the wrapper once all consumers are migrated (or keep it if it adds value)
+
+### 2. React Router v5 to v6
+
+StackRox currently uses React Router v5. Migration to v6 changes route definition and hook patterns.
+
+```typescript
+// BEFORE (React Router v5): render prop and useRouteMatch
+import { Switch, Route, useRouteMatch, useHistory } from 'react-router-dom';
+
+function VulnerabilityRoutes() {
+  const { path } = useRouteMatch();
+  const history = useHistory();
+
+  return (
+    <Switch>
+      <Route exact path={path} component={VulnerabilityList} />
+      <Route path={`${path}/:cveId`} component={VulnerabilityDetail} />
+    </Switch>
+  );
+}
+
+// AFTER (React Router v6): element prop, relative routes, useNavigate
+import { Routes, Route, useNavigate } from 'react-router-dom';
+
+function VulnerabilityRoutes() {
+  const navigate = useNavigate();
+
+  return (
+    <Routes>
+      <Route index element={<VulnerabilityList />} />
+      <Route path=":cveId" element={<VulnerabilityDetail />} />
+    </Routes>
+  );
+}
+```
+
+**Key changes:**
+- `Switch` becomes `Routes`
+- `component` prop becomes `element` with JSX
+- `useHistory()` becomes `useNavigate()`
+- `useRouteMatch()` becomes `useMatch()` or relative paths
+- Nested routes are relative by default
+
+### 3. redux-form to Formik
+
+Migrate forms from redux-form (deprecated) to Formik + Yup step-by-step:
+
+```
+Step 1: Add Formik + Yup to the feature
+  - Install if not already present
+  - Create a Yup validation schema mirroring the redux-form validate function
+
+Step 2: Rewrite the form component
+  - Replace reduxForm() HOC with <Formik> component
+  - Replace <Field component={...}> with Formik <Field> or useField()
+  - Replace handleSubmit prop with Formik's onSubmit
+  - Map existing validation logic to Yup schema
+
+Step 3: Remove Redux form state
+  - Remove the form reducer from the Redux store
+  - Remove formValueSelector calls -- use Formik's values instead
+  - Remove any dispatch(change(...)) calls -- use Formik's setFieldValue
+
+Step 4: Verify
+  - All form validation works (required fields, format checks)
+  - Submit sends correct data
+  - Error states display correctly
+  - Form reset/clear works
+```
+
+### 4. Codemod and ESLint Automation
+
+For large-scale migrations, use `jscodeshift` codemods and ESLint rules to automate repetitive changes.
+
+```bash
+# Run a PatternFly codemod across the codebase
+npx jscodeshift -t ./codemods/pf5-to-pf6-select.ts \
+  --extensions=tsx,ts \
+  ui/apps/platform/src/**/*.tsx
+
+# Add an ESLint rule to flag deprecated imports
+# .eslintrc.js
+{
+  "rules": {
+    "no-restricted-imports": ["error", {
+      "paths": [{
+        "name": "@patternfly/react-core/deprecated",
+        "message": "Use @patternfly/react-core instead. See patternfly-development skill."
+      }]
+    }]
+  }
+}
+```
+
+**When to use codemods vs manual migration:**
+- **Codemod:** Mechanical 1:1 replacements (import paths, renamed props, simple API changes)
+- **Manual:** Behavioral changes, new component composition patterns, logic changes
+- **ESLint rule:** Prevent regression after migration (flag deprecated imports in new code)
 
 ## Common Rationalizations
 

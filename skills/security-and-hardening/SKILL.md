@@ -1,13 +1,13 @@
 ---
 name: security-and-hardening
-description: Hardens code against vulnerabilities. Use when handling user input, authentication, data storage, or external integrations. Use when building any feature that accepts untrusted data, manages user sessions, or interacts with third-party services.
+description: Hardens frontend code against vulnerabilities in React/TypeScript applications. Use when handling user input, authentication tokens, data rendering, or external integrations. Use when building any feature that accepts untrusted data, manages sessions, or renders dynamic content in a StackRox UI context.
 ---
 
 # Security and Hardening
 
 ## Overview
 
-Security-first development practices for web applications. Treat every external input as hostile, every secret as sacred, and every authorization check as mandatory. Security isn't a phase — it's a constraint on every line of code that touches user data, authentication, or external systems.
+Security-first development practices for React/TypeScript frontend applications. Treat every external input as hostile, every auth token as sacred, and every rendered value as potentially malicious. Security isn't a phase -- it's a constraint on every component that touches user data, authentication, or external systems.
 
 ## When to Use
 
@@ -22,14 +22,14 @@ Security-first development practices for web applications. Treat every external 
 
 ### Always Do (No Exceptions)
 
-- **Validate all external input** at the system boundary (API routes, form handlers)
-- **Parameterize all database queries** — never concatenate user input into SQL
-- **Encode output** to prevent XSS (use framework auto-escaping, don't bypass it)
+- **Validate all external input** at the system boundary (form handlers, URL params, GraphQL responses)
+- **Use Formik + Yup** for form validation -- never write ad-hoc validation logic
+- **Encode output** to prevent XSS (React auto-escapes JSX; never bypass it)
 - **Use HTTPS** for all external communication
-- **Hash passwords** with bcrypt/scrypt/argon2 (never store plaintext)
 - **Set security headers** (CSP, HSTS, X-Frame-Options, X-Content-Type-Options)
-- **Use httpOnly, secure, sameSite cookies** for sessions
+- **Use httpOnly, secure, sameSite cookies** for auth tokens
 - **Run `npm audit`** (or equivalent) before every release
+- **Sanitize before `dangerouslySetInnerHTML`** -- always use DOMPurify, never raw HTML strings
 
 ### Ask First (Requires Human Approval)
 
@@ -44,12 +44,13 @@ Security-first development practices for web applications. Treat every external 
 ### Never Do
 
 - **Never commit secrets** to version control (API keys, passwords, tokens)
-- **Never log sensitive data** (passwords, tokens, full credit card numbers)
+- **Never log sensitive data** (passwords, tokens, PII)
 - **Never trust client-side validation** as a security boundary
 - **Never disable security headers** for convenience
-- **Never use `eval()` or `innerHTML`** with user-provided data
-- **Never store sessions in client-accessible storage** (localStorage for auth tokens)
+- **Never use `eval()` or `dangerouslySetInnerHTML`** with unsanitized user data
+- **Never store auth tokens in localStorage or sessionStorage** -- use httpOnly cookies
 - **Never expose stack traces** or internal error details to users
+- **Never store sensitive data in React state** that persists across routes without cleanup
 
 ## OWASP Top 10 Prevention
 
@@ -92,17 +93,55 @@ app.use(session({
 
 ### 3. Cross-Site Scripting (XSS)
 
-```typescript
-// BAD: Rendering user input as HTML
-element.innerHTML = userInput;
+React auto-escapes JSX expressions by default. XSS vulnerabilities in React come from explicitly bypassing this protection.
 
-// GOOD: Use framework auto-escaping (React does this by default)
+```typescript
+// BAD: dangerouslySetInnerHTML with raw user input
+return <div dangerouslySetInnerHTML={{ __html: userInput }} />;
+
+// BAD: Setting href with user-controlled protocol
+return <a href={userProvidedUrl}>Link</a>;  // javascript: protocol executes
+
+// GOOD: React auto-escaping (default behavior)
 return <div>{userInput}</div>;
 
-// If you MUST render HTML, sanitize first
+// GOOD: Sanitize when dangerouslySetInnerHTML is unavoidable
 import DOMPurify from 'dompurify';
-const clean = DOMPurify.sanitize(userInput);
+return <div dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(userInput) }} />;
+
+// GOOD: Validate URL protocols
+function isSafeUrl(url: string): boolean {
+  try {
+    const parsed = new URL(url);
+    return ['http:', 'https:'].includes(parsed.protocol);
+  } catch {
+    return false;
+  }
+}
 ```
+
+**React-specific XSS vectors to watch for:**
+- `dangerouslySetInnerHTML` -- always sanitize with DOMPurify
+- `href` and `src` attributes with user input -- validate protocol
+- Server-rendered content injected into client hydration
+- CSS injection via `style` props with user-controlled values
+
+### CSP for the StackRox Embedded Console
+
+The StackRox UI runs as an embedded console. CSP must account for:
+
+```
+Content-Security-Policy:
+  default-src 'self';
+  script-src 'self';
+  style-src 'self' 'unsafe-inline';    # PatternFly requires inline styles
+  img-src 'self' data:;                # Data URIs for icons
+  connect-src 'self' wss:;             # WebSocket for live updates
+  font-src 'self';
+  frame-ancestors 'self';              # Prevent clickjacking in embedded context
+```
+
+When adding new external resources (CDN fonts, analytics, etc.), update the CSP rather than weakening it with wildcards.
 
 ### 4. Broken Access Control
 
@@ -165,51 +204,136 @@ if (!API_KEY) throw new Error('STRIPE_API_KEY not configured');
 
 ## Input Validation Patterns
 
-### Schema Validation at Boundaries
+### Formik + Yup Schema Validation
+
+Use Formik for form state and Yup for schema validation. This is the standard pattern for StackRox frontend forms.
 
 ```typescript
-import { z } from 'zod';
+import { Formik, Form, Field, ErrorMessage } from 'formik';
+import * as Yup from 'yup';
 
-const CreateTaskSchema = z.object({
-  title: z.string().min(1).max(200).trim(),
-  description: z.string().max(2000).optional(),
-  priority: z.enum(['low', 'medium', 'high']).default('medium'),
-  dueDate: z.string().datetime().optional(),
+const CreatePolicySchema = Yup.object({
+  name: Yup.string()
+    .required('Policy name is required')
+    .min(1)
+    .max(200)
+    .trim(),
+  description: Yup.string().max(2000),
+  severity: Yup.string()
+    .oneOf(['LOW', 'MEDIUM', 'HIGH', 'CRITICAL'])
+    .required('Severity is required'),
+  categories: Yup.array()
+    .of(Yup.string().required())
+    .min(1, 'Select at least one category'),
 });
 
-// Validate at the route handler
-app.post('/api/tasks', async (req, res) => {
-  const result = CreateTaskSchema.safeParse(req.body);
-  if (!result.success) {
-    return res.status(422).json({
-      error: {
-        code: 'VALIDATION_ERROR',
-        message: 'Invalid input',
-        details: result.error.flatten(),
-      },
-    });
+type CreatePolicyValues = Yup.InferType<typeof CreatePolicySchema>;
+
+function CreatePolicyForm() {
+  const initialValues: CreatePolicyValues = {
+    name: '',
+    description: '',
+    severity: 'MEDIUM',
+    categories: [],
+  };
+
+  return (
+    <Formik
+      initialValues={initialValues}
+      validationSchema={CreatePolicySchema}
+      onSubmit={(values) => {
+        // values are typed and validated by Yup
+        createPolicy(values);
+      }}
+    >
+      <Form>
+        <Field name="name" />
+        <ErrorMessage name="name" component="div" />
+        {/* ... */}
+      </Form>
+    </Formik>
+  );
+}
+```
+
+### GraphQL Input Validation
+
+GraphQL typed variables provide a layer of validation, but always validate on the client side before sending mutations:
+
+```typescript
+// Yup schema mirrors the GraphQL input type
+const UpdateDeploymentSchema = Yup.object({
+  id: Yup.string().required(),
+  replicas: Yup.number().min(0).max(100).required(),
+  namespace: Yup.string().required(),
+});
+
+// Validate before executing the mutation
+const validatedInput = await UpdateDeploymentSchema.validate(formValues);
+await updateDeployment({ variables: { input: validatedInput } });
+```
+
+## Secure Auth Token Handling in React
+
+StackRox uses token-based authentication. The frontend must handle tokens without exposing them to XSS attacks.
+
+### Token Storage
+
+```typescript
+// BAD: Storing tokens in localStorage (accessible via XSS)
+localStorage.setItem('authToken', token);
+
+// BAD: Storing tokens in React state (lost on refresh, tempting to persist unsafely)
+const [token, setToken] = useState(response.token);
+
+// GOOD: httpOnly cookies set by the backend (not accessible via JavaScript)
+// The frontend doesn't handle the token at all -- it's sent automatically by the browser
+```
+
+### Apollo Client Token Refresh
+
+```typescript
+import { ApolloClient, InMemoryCache, createHttpLink, from } from '@apollo/client';
+import { onError } from '@apollo/client/link/error';
+
+const errorLink = onError(({ graphQLErrors, networkError }) => {
+  if (graphQLErrors) {
+    for (const err of graphQLErrors) {
+      if (err.extensions?.code === 'UNAUTHENTICATED') {
+        // Redirect to login -- do NOT attempt to refresh tokens client-side
+        // unless the backend provides a secure refresh endpoint with httpOnly cookies
+        window.location.href = '/login';
+      }
+    }
   }
-  // result.data is now typed and validated
-  const task = await taskService.create(result.data);
-  return res.status(201).json(task);
+});
+
+const httpLink = createHttpLink({
+  uri: '/api/graphql',
+  credentials: 'same-origin',  // Include httpOnly cookies automatically
+});
+
+const client = new ApolloClient({
+  link: from([errorLink, httpLink]),
+  cache: new InMemoryCache(),
 });
 ```
 
-### File Upload Safety
+### Sensitive Data Cleanup
 
 ```typescript
-// Restrict file types and sizes
-const ALLOWED_TYPES = ['image/jpeg', 'image/png', 'image/webp'];
-const MAX_SIZE = 5 * 1024 * 1024; // 5MB
+// Clean up sensitive data when components unmount or users navigate away
+useEffect(() => {
+  return () => {
+    // Clear any sensitive data from component state
+    setFormData(initialValues);
+  };
+}, []);
 
-function validateUpload(file: UploadedFile) {
-  if (!ALLOWED_TYPES.includes(file.mimetype)) {
-    throw new ValidationError('File type not allowed');
-  }
-  if (file.size > MAX_SIZE) {
-    throw new ValidationError('File too large (max 5MB)');
-  }
-  // Don't trust the file extension — check magic bytes if critical
+// Clear Apollo cache on logout
+async function handleLogout() {
+  await client.clearStore();
+  window.location.href = '/login';
 }
 ```
 
@@ -240,25 +364,28 @@ npm audit reports a vulnerability
 
 When you defer a fix, document the reason and set a review date.
 
-## Rate Limiting
+## Backend Reference
+
+The following are backend concerns. The StackRox frontend does not implement these directly, but frontend engineers should understand them when debugging auth or API issues.
+
+### Rate Limiting (Backend)
+
+Rate limiting is enforced server-side. The frontend should handle 429 (Too Many Requests) responses gracefully:
 
 ```typescript
-import rateLimit from 'express-rate-limit';
-
-// General API rate limit
-app.use('/api/', rateLimit({
-  windowMs: 15 * 60 * 1000, // 15 minutes
-  max: 100,                   // 100 requests per window
-  standardHeaders: true,
-  legacyHeaders: false,
-}));
-
-// Stricter limit for auth endpoints
-app.use('/api/auth/', rateLimit({
-  windowMs: 15 * 60 * 1000,
-  max: 10,  // 10 attempts per 15 minutes
-}));
+// Handle rate limiting in Apollo error link
+if (networkError && 'statusCode' in networkError && networkError.statusCode === 429) {
+  // Show user-friendly message, do NOT auto-retry aggressively
+  showAlert('Too many requests. Please wait a moment and try again.');
+}
 ```
+
+### Password Hashing (Backend)
+
+Password hashing (bcrypt/scrypt/argon2) is a backend responsibility. The frontend should:
+- Never send passwords in URL query parameters
+- Clear password fields after form submission
+- Use `type="password"` and `autocomplete="current-password"` attributes
 
 ## Secrets Management
 

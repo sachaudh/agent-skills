@@ -1,6 +1,6 @@
 ---
 name: context-engineering
-description: Optimizes agent context setup. Use when starting a new session, when agent output quality degrades, when switching between tasks, or when you need to configure rules files and context for a project.
+description: Optimizes agent context setup for StackRox frontend development. Use when starting a new session, when agent output quality degrades, when switching between tasks, or when you need to configure rules files and context for a React/TypeScript/PatternFly project.
 ---
 
 # Context Engineering
@@ -44,27 +44,29 @@ Create a rules file that persists across sessions. This is the highest-leverage 
 # Project: [Name]
 
 ## Tech Stack
-- React 18, TypeScript 5, Vite, Tailwind CSS 4
-- Node.js 22, Express, PostgreSQL, Prisma
+- React 18.2, TypeScript 5.9, PatternFly 6, Vite 6
+- Apollo Client 3.8, Redux 4 + thunk + saga, MobX 6
+- React Router 5, Formik 2 + Yup
+- Vitest 4, Cypress 15
 
 ## Commands
-- Build: `npm run build`
-- Test: `npm test`
-- Lint: `npm run lint --fix`
-- Dev: `npm run dev`
+- Build: `make ui-build`
+- Test: `make ui-test`
+- Lint: `make ui-lint`
+- Dev: `make ui-dev`
 - Type check: `npx tsc --noEmit`
 
 ## Code Conventions
 - Functional components with hooks (no class components)
 - Named exports (no default exports)
-- colocate tests next to source: `Button.tsx` → `Button.test.tsx`
-- Use `cn()` utility for conditional classNames
-- Error boundaries at route level
+- PatternFly 6 components for all UI elements
+- Apollo Client for GraphQL data fetching
+- Colocate tests: `Component.tsx` / `Component.test.tsx`
 
 ## Boundaries
 - Never commit .env files or secrets
-- Never add dependencies without checking bundle size impact
-- Ask before modifying database schema
+- Never bypass PatternFly -- no raw HTML for standard UI patterns
+- Ask before modifying GraphQL schema
 - Always run tests before committing
 
 ## Patterns
@@ -249,6 +251,91 @@ PLAN:
 ```
 
 This catches wrong directions before you've built on them. It's a 30-second investment that prevents 30-minute rework.
+
+## StackRox UI Context Loading
+
+The StackRox frontend (React 18.2 / TypeScript 5.9 / PatternFly 6) benefits from targeted context loading strategies. Load these progressively based on the current task -- never load everything at once.
+
+For project-level conventions and directory structure, see the `stackrox-ui-conventions` skill.
+
+### 1. PatternFly Component Documentation
+
+Use Context7 MCP to fetch current PatternFly 6 docs before composing UI:
+
+```
+CONTEXT LOADING:
+1. Resolve library: mcp__context7__resolve-library-id("patternfly")
+2. Query component docs: mcp__context7__query-docs(libraryId, "Select component usage")
+3. Load only the component(s) relevant to the current task
+```
+
+Load PatternFly docs when:
+- Building a new UI component or page
+- Migrating from an older PatternFly version
+- Debugging layout or theming issues
+- Unsure which PF component fits a use case
+
+### 2. Apollo Queries and Mutations Context
+
+StackRox GraphQL operations live in `ui/apps/platform/src/queries/`. Load relevant query files before working on data-fetching code:
+
+```
+PRE-TASK CONTEXT:
+1. Read the query/mutation file for the feature area
+   e.g., ui/apps/platform/src/queries/vulnerabilities.ts
+2. Read the associated TypeScript types
+   e.g., ui/apps/platform/src/types/vulnerability.ts
+3. Check for existing custom hooks that wrap the query
+   e.g., ui/apps/platform/src/hooks/useVulnerabilities.ts
+```
+
+Load query context when:
+- Adding or modifying a data-fetching component
+- Debugging stale cache or missing data issues
+- Implementing optimistic updates or cache policies
+
+### 3. StackRox Directory Map
+
+Maintain a hierarchical summary of the StackRox UI structure for navigation:
+
+```
+ui/apps/platform/src/
+  components/     → Shared, reusable UI components
+  containers/     → Page-level components with data fetching
+  services/       → API client wrappers and REST utilities
+  hooks/          → Custom React hooks
+  reducers/       → Redux reducers and action creators
+  sagas/          → Redux-saga side effect handlers
+  queries/        → GraphQL query and mutation definitions
+  providers/      → React context providers
+  utils/          → Pure utility functions
+  types/          → Shared TypeScript types and interfaces
+  constants/      → Enums and configuration constants
+  Patches/        → PatternFly component overrides and wrappers
+```
+
+Load directory context when:
+- Starting a new session on the StackRox codebase
+- Creating a new feature (to place files correctly)
+- Looking for existing implementations to follow
+
+### 4. Redux and Saga Context for Stateful Features
+
+Some StackRox features use Redux + redux-saga for complex state management. Load the full state slice before modifying stateful features:
+
+```
+STATEFUL FEATURE CONTEXT:
+1. Read the reducer:    src/reducers/featureName.ts
+2. Read the saga:       src/sagas/featureName.ts
+3. Read the selectors:  src/selectors/featureName.ts (if exists)
+4. Read the container:  src/containers/FeaturePage.tsx
+5. Identify dispatch calls and action types
+```
+
+Load Redux/Saga context when:
+- Modifying features that use Redux for state (not Apollo cache)
+- Debugging action dispatch or saga side-effect issues
+- Migrating a feature from Redux to Apollo cache or React state
 
 ## Anti-Patterns
 

@@ -1,6 +1,6 @@
 # Security Checklist
 
-Quick reference for web application security. Use alongside the `security-and-hardening` skill.
+Quick reference for frontend security in React/TypeScript applications. Use alongside the `security-and-hardening` skill. Focused on StackRox UI concerns -- browser-side vulnerabilities, auth token handling, and PatternFly component security.
 
 ## Table of Contents
 
@@ -8,9 +8,10 @@ Quick reference for web application security. Use alongside the `security-and-ha
 - [Authentication](#authentication)
 - [Authorization](#authorization)
 - [Input Validation](#input-validation)
-- [Security Headers](#security-headers)
-- [CORS Configuration](#cors-configuration)
-- [Data Protection](#data-protection)
+- [React/Frontend-Specific](#reactfrontend-specific)
+- [Security Headers (Backend)](#security-headers-backend)
+- [CORS Configuration (Backend)](#cors-configuration-backend)
+- [Data Protection (Backend)](#data-protection-backend)
 - [Dependency Security](#dependency-security)
 - [Error Handling](#error-handling)
 - [OWASP Top 10 Quick Reference](#owasp-top-10-quick-reference)
@@ -23,13 +24,15 @@ Quick reference for web application security. Use alongside the `security-and-ha
 
 ## Authentication
 
-- [ ] Passwords hashed with bcrypt (≥12 rounds), scrypt, or argon2
-- [ ] Session cookies: `httpOnly`, `secure`, `sameSite: 'lax'`
-- [ ] Session expiration configured (reasonable max-age)
-- [ ] Rate limiting on login endpoint (≤10 attempts per 15 minutes)
-- [ ] Password reset tokens: time-limited (≤1 hour), single-use
-- [ ] Account lockout after repeated failures (optional, with notification)
-- [ ] MFA supported for sensitive operations (optional but recommended)
+- [ ] Auth tokens stored in httpOnly cookies (never localStorage or sessionStorage)
+- [ ] Apollo Client uses `credentials: 'same-origin'` for automatic cookie inclusion
+- [ ] Apollo error link handles `UNAUTHENTICATED` errors with redirect to login
+- [ ] `client.clearStore()` called on logout to purge cached authenticated data
+- [ ] Password fields use `type="password"` and appropriate `autocomplete` attributes
+- [ ] Password fields cleared after form submission
+- [ ] Login form does not send credentials in URL query parameters
+- [ ] _Backend:_ Session cookies set with `httpOnly`, `secure`, `sameSite: 'lax'`
+- [ ] _Backend:_ Rate limiting on login endpoint (<=10 attempts per 15 minutes)
 
 ## Authorization
 
@@ -41,17 +44,29 @@ Quick reference for web application security. Use alongside the `security-and-ha
 
 ## Input Validation
 
-- [ ] All user input validated at system boundaries (API routes, form handlers)
-- [ ] Validation uses allowlists (not denylists)
-- [ ] String lengths constrained (min/max)
-- [ ] Numeric ranges validated
-- [ ] Email, URL, and date formats validated with proper libraries
-- [ ] File uploads: type restricted, size limited, content verified
-- [ ] SQL queries parameterized (no string concatenation)
-- [ ] HTML output encoded (use framework auto-escaping)
-- [ ] URLs validated before redirect (prevent open redirect)
+- [ ] All forms use Formik + Yup for validation (no ad-hoc validation logic)
+- [ ] Yup schemas define allowlists for enum-like fields (`oneOf`)
+- [ ] String lengths constrained with `min()` / `max()`
+- [ ] Numeric ranges validated with `min()` / `max()`
+- [ ] GraphQL mutations use typed input variables (not string interpolation)
+- [ ] Client-side validation mirrors GraphQL schema constraints
+- [ ] URLs validated before use in `href` or `src` (allowlist protocols: `http:`, `https:`)
+- [ ] React auto-escaping not bypassed (no `dangerouslySetInnerHTML` without DOMPurify)
+- [ ] URL params parsed with type checking before use in queries
 
-## Security Headers
+## React/Frontend-Specific
+
+- [ ] No `dangerouslySetInnerHTML` without DOMPurify sanitization
+- [ ] No `eval()`, `new Function()`, or dynamic script injection
+- [ ] User-controlled values never used in `style` props without sanitization (CSS injection)
+- [ ] Sensitive data cleared from React state on component unmount (`useEffect` cleanup)
+- [ ] Auth-protected routes use route guards, not conditional rendering alone
+- [ ] Error boundaries catch rendering errors without exposing internal details to users
+- [ ] No secrets or API keys in client-side code (check `import.meta.env` usage)
+- [ ] GraphQL error responses handled without exposing server internals to users
+- [ ] File downloads validated and sanitized before triggering browser download
+
+## Security Headers (Backend)
 
 ```
 Content-Security-Policy: default-src 'self'; script-src 'self'
@@ -63,7 +78,7 @@ Referrer-Policy: strict-origin-when-cross-origin
 Permissions-Policy: camera=(), microphone=(), geolocation=()
 ```
 
-## CORS Configuration
+## CORS Configuration (Backend)
 
 ```typescript
 // Restrictive (recommended)
@@ -78,7 +93,7 @@ cors({
 cors({ origin: '*' })  // Allows any origin
 ```
 
-## Data Protection
+## Data Protection (Backend)
 
 - [ ] Sensitive fields excluded from API responses (`passwordHash`, `resetToken`, etc.)
 - [ ] Sensitive data not logged (passwords, tokens, full CC numbers)
