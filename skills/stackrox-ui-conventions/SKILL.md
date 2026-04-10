@@ -25,8 +25,8 @@ The StackRox UI lives under `ui/apps/platform/src/`. Key directories:
 
 ```
 ui/apps/platform/src/
-  components/        # Shared, reusable UI components (buttons, modals, tables)
-  containers/        # Page-level components connected to data (routes map here)
+  Components/        # Shared, reusable UI components (buttons, modals, tables)
+  Containers/        # Page-level components connected to data (routes map here)
   services/          # API call wrappers (REST and GraphQL client functions)
   hooks/             # Shared custom React hooks
   reducers/          # Redux reducers (one file per slice)
@@ -43,9 +43,9 @@ ui/apps/platform/src/
 ### Placement Rules
 
 ```
-Is it a full page with a route?        --> containers/
-Is it a shared visual component?        --> components/
-Is it a feature-scoped component?       --> containers/<Feature>/
+Is it a full page with a route?        --> Containers/
+Is it a shared visual component?        --> Components/
+Is it a feature-scoped component?       --> Containers/<Feature>/
 Does it call an API?                    --> services/
 Is it a GraphQL document?              --> queries/ or co-located with component
 Is it a reusable React hook?           --> hooks/
@@ -92,7 +92,7 @@ Is it a pure utility function?         --> utils/
 A feature in StackRox UI groups related components, hooks, and logic under the container directory:
 
 ```
-containers/
+Containers/
   Vulnerabilities/
     VulnerabilitiesPage.tsx          # Route entry point
     VulnerabilityTable.tsx           # Feature-specific component
@@ -109,16 +109,16 @@ containers/
 
 ```
 Is the component used by 2+ features?
-  YES --> Move to components/
-  NO  --> Keep in containers/<Feature>/
+  YES --> Move to Components/
+  NO  --> Keep in Containers/<Feature>/
 
 Is the hook used by 2+ features?
   YES --> Move to hooks/
-  NO  --> Keep in containers/<Feature>/
+  NO  --> Keep in Containers/<Feature>/
 
 Is the type used by 2+ features?
   YES --> Move to types/
-  NO  --> Keep in containers/<Feature>/
+  NO  --> Keep in Containers/<Feature>/
 ```
 
 Rule: start feature-scoped, promote to shared only when reuse is real (not hypothetical).
@@ -130,7 +130,7 @@ Rule: start feature-scoped, promote to shared only when reuse is real (not hypot
 Containers connect to data (Redux, Apollo, services). Presentation components receive props and render UI.
 
 ```tsx
-// Container: containers/Vulnerabilities/VulnerabilitiesPage.tsx
+// Container: Containers/Vulnerabilities/VulnerabilitiesPage.tsx
 export function VulnerabilitiesPage() {
   const { data, loading, error } = useQuery(GET_VULNERABILITIES);
   const filters = useVulnerabilityFilters();
@@ -146,7 +146,7 @@ export function VulnerabilitiesPage() {
   );
 }
 
-// Presentation: containers/Vulnerabilities/VulnerabilityTable.tsx
+// Presentation: Containers/Vulnerabilities/VulnerabilityTable.tsx
 export function VulnerabilityTable({ rows, filters }: VulnerabilityTableProps) {
   // Pure rendering -- no data fetching, no side effects
   return (
@@ -199,14 +199,14 @@ export const vulnerabilitiesPath = '/main/vulnerabilities';
 
 New pages require:
 1. A route path constant in `routePaths.ts`
-2. A container component in `containers/`
+2. A container component in `Containers/`
 3. A `<Route>` entry in the appropriate router configuration
 
 ## Common Rationalizations
 
 | Rationalization | Reality |
 |---|---|
-| "I'll put everything in components/ for now" | Feature-scoped code belongs in containers/. Premature sharing creates coupling between unrelated features. |
+| "I'll put everything in Components/ for now" | Feature-scoped code belongs in Containers/. Premature sharing creates coupling between unrelated features. |
 | "Index files make imports cleaner" | They hide the dependency graph, cause circular imports, and make tree-shaking harder. Use direct imports. |
 | "This component is small enough to skip the container/presentation split" | The split isn't about size -- it's about separating data concerns from rendering. Even small components benefit. |
 | "I'll create a shared hook for this since it might be reused" | Start feature-scoped. Extract to hooks/ only when a second feature actually needs it. |
@@ -214,7 +214,7 @@ New pages require:
 
 ## Red Flags
 
-- Components in `components/` that are only used by one feature (should be in `containers/<Feature>/`)
+- Components in `Components/` that are only used by one feature (should be in `Containers/<Feature>/`)
 - Service functions inside component files (should be in `services/`)
 - GraphQL queries defined inline in components (should be in `queries/` or a co-located file)
 - Redux actions, reducers, and sagas in the same file (separate by concern)
@@ -228,7 +228,7 @@ After creating or restructuring code in StackRox UI:
 
 - [ ] New files are in the correct directory per the placement rules
 - [ ] File and symbol names follow the naming conventions table
-- [ ] Feature-scoped code lives under `containers/<Feature>/`, not in shared directories
+- [ ] Feature-scoped code lives under `Containers/<Feature>/`, not in shared directories
 - [ ] Container components handle data; presentation components receive props
 - [ ] Route paths use constants from `routePaths.ts`
 - [ ] No barrel `index.ts` files added

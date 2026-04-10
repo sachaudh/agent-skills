@@ -14,7 +14,7 @@ Treat the `stackrox-ui-conventions`, `patternfly-development`, `graphql-and-data
 Evaluate every change across these six dimensions:
 
 ### 1. Component Composition
-- Does the component belong in `components/`, `containers/`, or a feature folder? (see `stackrox-ui-conventions`)
+- Does the component belong in `Components/`, `Containers/`, or a feature folder? (see `stackrox-ui-conventions`)
 - Is the component split along data-fetching vs. presentation boundaries?
 - Are props narrowly typed and minimal? No "god props" or unused props.
 - Are children composed rather than configured through long prop lists?

@@ -34,13 +34,15 @@ ui/apps/platform/src/
   queries/          -- Apollo query/mutation definitions
   reducers/         -- Redux reducers and action creators
   sagas/            -- Redux sagas for async workflows
-  store/            -- MobX stores (feature-specific)
   providers/        -- React context providers
   routePaths.ts     -- Central route definitions
   constants/        -- Shared enums and constants
+  sorters/          -- Shared table sort comparators
   utils/            -- Pure helpers, no React
   types/            -- Shared TypeScript types
 ```
+
+MobX stores are feature-scoped and co-located under `Containers/<Feature>/`, not in a shared `store/` directory.
 
 Do not recite this list unless the contributor asks. Point them at the real directory and let them explore.
 

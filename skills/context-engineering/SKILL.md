@@ -300,8 +300,8 @@ Maintain a hierarchical summary of the StackRox UI structure for navigation:
 
 ```
 ui/apps/platform/src/
-  components/     → Shared, reusable UI components
-  containers/     → Page-level components with data fetching
+  Components/     → Shared, reusable UI components (PascalCase)
+  Containers/     → Page-level components with data fetching (PascalCase)
   services/       → API client wrappers and REST utilities
   hooks/          → Custom React hooks
   reducers/       → Redux reducers and action creators
@@ -311,8 +311,11 @@ ui/apps/platform/src/
   utils/          → Pure utility functions
   types/          → Shared TypeScript types and interfaces
   constants/      → Enums and configuration constants
-  Patches/        → PatternFly component overrides and wrappers
+  sorters/        → Shared table sort comparators
+  routePaths.ts   → Centralized route path constants
 ```
+
+Note: only `Components/` and `Containers/` are PascalCase; every other top-level directory under `src/` is lowercase.
 
 Load directory context when:
 - Starting a new session on the StackRox codebase
@@ -327,8 +330,8 @@ Some StackRox features use Redux + redux-saga for complex state management. Load
 STATEFUL FEATURE CONTEXT:
 1. Read the reducer:    src/reducers/featureName.ts
 2. Read the saga:       src/sagas/featureName.ts
-3. Read the selectors:  src/selectors/featureName.ts (if exists)
-4. Read the container:  src/containers/FeaturePage.tsx
+3. Read any selectors exported from the reducer file
+4. Read the container:  src/Containers/<Feature>/FeaturePage.tsx
 5. Identify dispatch calls and action types
 ```
 

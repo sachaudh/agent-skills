@@ -20,7 +20,7 @@ A list view with a page header, filter bar, paginated table, and row actions. Us
 **File layout:**
 
 ```
-containers/MyFeature/
+Containers/MyFeature/
   MyFeatureListPage.tsx       -- Container: data fetching + layout
   MyFeatureTable.tsx          -- Presentational table
   MyFeatureToolbar.tsx        -- Filter bar + search
@@ -83,7 +83,7 @@ A side drawer showing details for a selected item in a list. Used for drill-down
 **File layout:**
 
 ```
-containers/MyFeature/
+Containers/MyFeature/
   MyFeatureListWithDetail.tsx  -- Drawer wrapper
   MyFeatureDetailPanel.tsx     -- Panel contents
   MyFeatureDetailTabs/
@@ -139,7 +139,7 @@ A multi-step form for creating or editing a complex entity. Used for policy crea
 **File layout:**
 
 ```
-containers/MyFeature/MyFeatureWizard/
+Containers/MyFeature/MyFeatureWizard/
   MyFeatureWizard.tsx          -- Wizard container
   schema.ts                    -- Yup schema per step + composed schema
   initialValues.ts             -- Typed initial values
@@ -196,7 +196,7 @@ A horizontal toolbar with search, filter chips, and bulk actions. Used on every 
 **File layout:**
 
 ```
-containers/MyFeature/
+Containers/MyFeature/
   MyFeatureToolbar.tsx         -- Toolbar wrapper
   filters/
     StatusFilter.tsx
@@ -269,7 +269,7 @@ The UI shown when a list has no items or a filter returns zero results. Every li
 **File layout:**
 
 ```
-components/EmptyStates/
+Components/EmptyStates/
   MyFeatureEmptyState.tsx
   MyFeatureFilteredEmptyState.tsx
 ```
@@ -317,7 +317,7 @@ A component that catches rendering errors in its subtree and shows a fallback UI
 **File layout:**
 
 ```
-components/ErrorBoundary/
+Components/ErrorBoundary/
   ErrorBoundary.tsx          -- Generic boundary
   RouteErrorBoundary.tsx     -- Boundary for route-level errors
 ```
