@@ -30,4 +30,4 @@
 ## Phase 5: Docs
 - [x] **T5.1** Update `docs/getting-started.md`
 - [x] **T5.2** Final `CLAUDE.md` update
-- [ ] **CHECKPOINT 5** Final validation against SPEC.md
+- [x] **CHECKPOINT 5** Final validation against SPEC.md
