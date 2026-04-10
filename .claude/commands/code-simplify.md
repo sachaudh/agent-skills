@@ -19,4 +19,6 @@ Simplify recently changed code (or the specified scope) while preserving exact b
 5. Apply each simplification incrementally — run tests after each change
 6. Verify all tests pass, the build succeeds, and the diff is clean
 
-If tests fail after a simplification, revert that change and reconsider. Use `code-review-and-quality` to review the result.
+If tests fail after a simplification, revert that change and reconsider. Use agent-skills:code-review-and-quality to review the result.
+
+For StackRox UI changes, also load agent-skills:stackrox-ui-conventions and agent-skills:patternfly-development so simplifications respect StackRox file placement, naming, and PatternFly 6 component conventions rather than rewriting them in a generic style.

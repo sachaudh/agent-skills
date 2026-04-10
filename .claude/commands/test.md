@@ -17,3 +17,5 @@ For bug fixes (Prove-It pattern):
 5. Run the full test suite for regressions
 
 For browser-related issues, also invoke agent-skills:browser-testing-with-devtools to verify with Chrome DevTools MCP.
+
+For end-to-end coverage of a user flow in the StackRox UI codebase, invoke agent-skills:cypress-e2e-testing and write the spec under `ui/apps/platform/cypress/integration/`. Pair component/unit tests (Vitest + @testing-library/react) with at least one Cypress flow when adding a new page, route, or wizard.

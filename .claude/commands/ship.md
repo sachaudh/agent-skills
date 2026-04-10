@@ -13,5 +13,12 @@ Run through the complete pre-launch checklist:
 5. **Infrastructure** — Env vars set, migrations ready, monitoring configured
 6. **Documentation** — README current, ADRs written, changelog updated
 
+For StackRox UI changes, also load:
+
+- agent-skills:stackrox-ui-conventions — confirm directory placement and naming match conventions
+- agent-skills:patternfly-development plus `references/patternfly-checklist.md` — verify PF6 component usage and a11y patterns
+- `references/accessibility-checklist.md` — full keyboard, focus, screen reader, contrast pass
+- agent-skills:cypress-e2e-testing — verify the relevant Cypress flows are green
+
 Report any failing checks and help resolve them before deployment.
 Define the rollback plan before proceeding.

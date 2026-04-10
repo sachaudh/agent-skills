@@ -15,4 +15,13 @@ Pick the next pending task from the plan. For each task:
 7. Commit with a descriptive message
 8. Mark the task complete and move to the next one
 
+**StackRox UI context.** When the task touches the StackRox UI codebase, load the relevant skills before implementing — do not guess at conventions:
+
+- agent-skills:stackrox-ui-conventions — directory layout, file placement, naming, import order
+- agent-skills:patternfly-development — PatternFly 6 component selection and a11y patterns
+- agent-skills:frontend-ui-engineering — React 18 + TypeScript 5.9 component structure
+- agent-skills:rest-and-service-layer — default data layer (`services/` + `useRestQuery` / `useRestMutation` / `usePaginatedQuery`)
+- agent-skills:graphql-and-data-layer — only when extending an existing GraphQL query or consuming a backend-authored GraphQL endpoint
+- agent-skills:react-state-patterns — local state vs Redux/saga decisions
+
 If any step fails, follow the agent-skills:debugging-and-error-recovery skill.
